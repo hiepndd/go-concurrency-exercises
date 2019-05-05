@@ -30,7 +30,7 @@ func (m *MockProcess) Run() {
 
 // Stop tries to gracefully stop the process, in this mock example
 // this will not succeed
-func (m *MockProcess) Stop() {
+func (m *MockProcess) Stop(done chan struct{}) {
 	if !m.isRunning {
 		log.Fatal("Cannot stop a process which is not running")
 	}
@@ -40,4 +40,5 @@ func (m *MockProcess) Stop() {
 		fmt.Print(".")
 		time.Sleep(1 * time.Second)
 	}
+	done <- struct{}{}
 }

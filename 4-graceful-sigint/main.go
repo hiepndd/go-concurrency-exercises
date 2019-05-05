@@ -13,10 +13,42 @@
 
 package main
 
+import (
+	"log"
+	"os"
+	"os/signal"
+)
+
+var signals chan os.Signal
+var counter int
+
 func main() {
+
+	signals = make(chan os.Signal)
+
 	// Create a process
+
 	proc := MockProcess{}
 
 	// Run the process (blocking)
-	proc.Run()
+	go proc.Run()
+
+	signal.Notify(signals, os.Interrupt)
+
+	sig := <-signals
+
+	log.Println("\nSignal received.", sig)
+
+	done := make(chan struct{})
+
+	go proc.Stop(done)
+
+	select {
+	case sig = <-signals:
+		log.Println("\nSignal received.", sig)
+		os.Exit(0)
+	case <-done:
+		log.Println("\nPorcess shutdown succesfully")
+	}
+
 }
